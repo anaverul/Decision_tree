@@ -51,7 +51,24 @@ class Node:
         return self._entropy
     def get_feature_list(self):
         return self._feature_list
-
+    
+def split(node):
+    new_nodes = []
+    subdictionary = node.get_subdict()
+    feat = node.get_feature()
+    for i in range(len(subdictionary)):
+        new_nodes.append(subdictionary[i][feat])
+    new_nodes = (list(Counter(new_nodes).keys()))
+    for val in new_nodes:
+        new_subdict = {}
+        for key, value in subdictionary.items():
+            if subdictionary[key][feat] == val:
+                new_subdict[key] = value
+        feature, lowest_entr = get_lowest_entropy(new_subdict)
+        labels = list((list(new_subdict.values())[0]).keys())[:len(new_subdict)-1]
+        new_node = Node(new_subdict, random.choice(feature), lowest_entr, labels)
+        # tree.add_node(node) is what we want to do here
+        
 def main():
     mydict = read_file('pets.txt')
     feature, lowest_entr = get_lowest_entropy(subdict)
