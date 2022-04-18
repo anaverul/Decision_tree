@@ -116,7 +116,7 @@ def build_decision_tree(curr_dictionary,parent):
         print(node.get_subdict(), node.get_attr(), node.get_classifier(), node.get_entropy())
         print()
         print()
-        if node.get_entropy()==0.0:
+        if node.get_entropy()==1.0:
             return node.get_classifier()
         else:
             build_decision_tree(curr_dictionary,node) 
