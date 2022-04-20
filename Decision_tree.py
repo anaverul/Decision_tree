@@ -67,6 +67,7 @@ class Node:
         self._subdict = subdict
         self._attr = attr
         self._classifier = classifier
+        self._child = None
         
     def get_subdict(self):
         return self._subdict
@@ -74,6 +75,8 @@ class Node:
         return self._attr
     def get_classifier(self):
         return self._classifier
+    def get_child(self):
+        return self._child
     
     def set_subdict(self,sub_dict):
         self._subdict = sub_dict
@@ -81,36 +84,43 @@ class Node:
         self._attr = attr
     def set_classifier(self, classifier):
         self._classifier = classifier
+    def set_child(self, child):
+        self._child = child
 
 def get_root(features):
     goal = return_goal(features)
     node = Node(features, None, None )
     return node
 
-def build_decision_tree(curr_list, parent, goal): 
+def build_decision_tree(curr_list, curr_node, goal): 
     stop = True
     for item in curr_list:
         if len(item)>1:
             stop = False
     print()
     if stop == True:
-        return parent
+        return curr_node
     lb = list(curr_list[0].keys())[:-1]#size, color...
     table = convert(curr_list, gl, lb)#size{tiny:[yes, no]...} 
-    entropy, attribute = minimum_entropy(table)
+    entropy, feature = minimum_entropy(table)
     if entropy == 0.0:
-        return
-    for key in table[attribute]:
+        return 
+    child = {}
+    for key in table[feature]:
         temp_list = []
+        class_val = Counter(table[feature][key])
+        proportion = sum(class_val.values())
+        max_value = (max(class_val, key=class_val.get),round(max(class_val.values())/proportion,2))
         for d in curr_list:
-            if d[attribute] == key:#attr = size, color...
+            if d[feature] == key:#attr = size, color...
                 temp_dic = copy.deepcopy(d)
-                temp_dic.pop(attribute)
+                temp_dic.pop(feature)
                 temp_list.append(temp_dic)
-                
-        node = Node (temp_list, key, goal)
-        print(node.get_subdict(),node.get_attr())
-        
+
+        node = Node (temp_list, key, max_value)
+        child[key]=node
+        curr_node.set_child(child)
+        print(node.get_classifier(),curr_node.get_child())
         build_decision_tree(temp_list,node,goal)
 
 tb, lb = read_file('pets.txt')
