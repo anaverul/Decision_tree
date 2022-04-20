@@ -2,6 +2,7 @@ import numpy as np
 import math 
 import random
 from collections import Counter
+import copy
 
 def read_file(file_n):
     with open(file_n) as file:
