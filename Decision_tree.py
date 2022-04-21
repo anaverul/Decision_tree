@@ -170,18 +170,22 @@ def cross_validation(input_file):
         tb, lb =read_file("testing.txt")
         gl = return_goal(tb)
         root = get_root(tb)
+        accurate_tb, accurate_lb = read_file(input_file)
+        accurate_root = get_root(accurate_tb)
+        build_decision_tree(accurate_tb, accurate_root, gl)
         build_decision_tree(tb, root, gl)
         input_dict = user_dic(lines_list[i], tb)
         print("testing input: ", input_dict)
-        print("classification: ", query(input_dict, root))
+        print("classification: ", query(input_dict, root), query(input_dict, accurate_root), 
+              query(input_dict, root)[0] == query(input_dict, accurate_root)[0] )
         print()
 
         
         
 tb, lb = read_file('pets.txt')
 gl = return_goal(tb)
-root = get_root(tb)
-line = "small	orange	pointed	yes"
-build_decision_tree(tb, root, gl)
-dic = user_dic(line,tb)
+#root = get_root(tb)
+#line = "small	orange	pointed	yes"
+#build_decision_tree(tb, root, gl)
+#dic = user_dic(line,tb)
 cross_validation('pets.txt')
