@@ -3,6 +3,7 @@ import math
 import random
 from collections import Counter
 import copy
+import os
 
 def read_file(file_n):
     with open(file_n) as file:
@@ -89,7 +90,13 @@ class Node:
 
 def get_root(features):
     goal = return_goal(features)
-    node = Node(features, None, None )
+    classifier = []
+    for i in range(len(features)):
+        classifier.append(features[i][goal])
+    class_val=Counter(classifier)
+    proportion = sum(class_val.values())
+    max_value = (max(class_val, key=class_val.get),round(max(class_val.values())/proportion,2))
+    node = Node(features, None, max_value)
     return node
 
 def build_decision_tree(curr_list, curr_node, goal): 
@@ -97,7 +104,6 @@ def build_decision_tree(curr_list, curr_node, goal):
     for item in curr_list:
         if len(item)>1:
             stop = False
-    print()
     if stop == True:
         return curr_node
     lb = list(curr_list[0].keys())[:-1]#size, color...
@@ -120,10 +126,62 @@ def build_decision_tree(curr_list, curr_node, goal):
         node = Node (temp_list, key, max_value)
         child[key]=node
         curr_node.set_child(child)
-        print(node.get_classifier(),curr_node.get_child())
         build_decision_tree(temp_list,node,goal)
+        
 
+def user_dic(line_input,inital_dic):#does not handle cases where the user inputs attribute in different order
+    labels = list(inital_dic[0].keys())
+    del labels[-1]
+    attributes = line_input.split()
+    query_dic = {}
+    for i in range(len(labels)):
+        query_dic[labels[i]]=attributes[i]
+    return query_dic
+        
+def query(query_dic, curr_node):
+    if len(query_dic)==0 or curr_node.get_child()==None:
+        return (curr_node.get_classifier())
+    
+    for key,value in list(query_dic.items()):
+        if value in list(curr_node.get_child().keys()):
+            temp_query = copy.deepcopy(query_dic)
+            del temp_query[key]
+            return query(temp_query,curr_node.get_child()[value])
+        else:
+            return curr_node.get_classifier()
+
+def cross_validation(input_file):
+    with open(input_file) as file:
+        data = file.readlines()
+    lines_list = []
+    labels_line = data[0]
+    for line in data[1:]:
+        lines_list.append(line)
+    for i in range(len(lines_list)):
+        if os.path.exists("testing.txt"):
+            os.remove("testing.txt")
+        test_input = copy.deepcopy(lines_list)
+        test_input.pop(i)
+        f = open("testing.txt", "a")
+        f.write(labels_line)
+        for item in test_input:
+            f.write(item)
+        f.close()
+        tb, lb =read_file("testing.txt")
+        gl = return_goal(tb)
+        root = get_root(tb)
+        build_decision_tree(tb, root, gl)
+        input_dict = user_dic(lines_list[i], tb)
+        print("testing input: ", input_dict)
+        print("classification: ", query(input_dict, root))
+        print()
+
+        
+        
 tb, lb = read_file('pets.txt')
 gl = return_goal(tb)
 root = get_root(tb)
+line = "small	orange	pointed	yes"
 build_decision_tree(tb, root, gl)
+dic = user_dic(line,tb)
+cross_validation('pets.txt')
